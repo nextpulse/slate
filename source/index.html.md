@@ -203,9 +203,9 @@ $ curl  -H "Authorization: mytoken"  https://api.path.tech/v1/sources/all
 			"label": "Coinbase Pro",
 			"name": "coinbase_pro",
 			"type": "exchange",
-      "key": true,
-      "oauth": false,
-      "csv": false
+			"key": true,
+			"oauth": false,
+			"csv": false
 		}
 		{...},
 		{...}
