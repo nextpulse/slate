@@ -7,7 +7,7 @@ language_tabs: # must be one of https://git.io/vQNgJ
 
 toc_footers:
   - <a href='https://path.tech?doc=1'>Sign Up for a Developer Key</a>
-
+  - last updated jan 5 2019
 
 search: true
 ---
@@ -265,6 +265,7 @@ $ curl -G -H "Authorization: mytoken"  https://api.path.tech/v1/sources/d5d.../c
 			"currency": "ltc",
 			"balance": "1.0",
 			"ds_id": "aaaaa...",
+			"vault": false,
 			"updated": "2018-10-03T16:59:34Z"
 		}
 		{...},
@@ -691,7 +692,7 @@ Retrieve the full parent/child mapping for a <code>Ledger</code>. Is this useful
 
 # Errors
 
-Path. uses conventional HTTP response codes to indicate the success or failure of an API request. Additionally, an error field may also be set in the json response.
+Path. uses conventional HTTP response codes to indicate the success or failure of an API request. Additionally, a description field may also be set in the json response. This is typically the raw response from the external data source. 
 
 HTTP status code summary
 
@@ -705,7 +706,8 @@ Code| Meaning
 
 ```json
 {
-	"error": "Not Authorized"
+	"error": "Request to Coinbase Pro failed",
+	"description": "{\"message\":\"Invalid API Key\"}"
 }
 ```
 
