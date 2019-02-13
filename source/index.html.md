@@ -7,7 +7,7 @@ language_tabs: # must be one of https://git.io/vQNgJ
 
 toc_footers:
   - <a href='https://path.tech?doc=1'>Sign Up for a Developer Key</a>
-  - last updated jan 30 2019
+  - last updated feb 13 2019
 
 search: true
 ---
@@ -336,12 +336,12 @@ $ curl -X POST -H "Authorization: mytoken"  https://api.path.tech/v1/balances/et
 
 ```
 
-> GET /balances/ethereum   (retrieve from cache)
+> GET /balances  (retrieve from cache)
 
 > Example Request
 
 ```shell
-$ curl -G -H "Authorization: mytoken"  https://api.path.tech/v1/balances/ethereum?user_id=d5d...&name=myetherwallet
+$ curl -G -H "Authorization: mytoken"  https://api.path.tech/v1/balances?user_id=d5d...&name=myetherwallet
 
 ```
 
@@ -521,12 +521,12 @@ $ curl -X POST -H "Authorization: mytoken"  https://api.path.tech/v1/transaction
 	-d address='0xa...' 
 ```
 
-> GET /transactions/ethereum (retrieve from cache)
+> GET /transactions (retrieve from cache)
 
 > Example Request
 
 ```shell
-$ curl -G -H "Authorization: mytoken"  https://api.path.tech/v1/transactions/ethereum?user_id=d5d...&name=myetherwallet&address=0xa..
+$ curl -G -H "Authorization: mytoken"  https://api.path.tech/v1/transactions?user_id=d5d...&name=myetherwallet
 
 ```
 
@@ -623,7 +623,8 @@ Returned as part of the response from a <code>/ledgers</code> request.
 
 Name | Description
 --------- | -----------
-id | The ID of the <code>Ledger</code> object. 
+id | The ID of the <code>Ledger</code> object.
+network_hash | The network hash value if applicable.
 trans_id | Data source's own specific id.
 trans_type | The [transaction type](#transaction-type).  
 amount | Amount of the transaction.
@@ -634,7 +635,8 @@ native_currency | The quote currency. (For example the currency used to obtain t
 fee_amount | If available or applicable, fee associated with the transaction. 
 fee_currency | The currency of the fee.
 description | Additional information to describe the transaction.
-usd_unit_price | The USD price for a single unit of the base currency. (A closing price on the date of the transaction will be used if none is available in the original transaction.)
+usd_unit_price | The USD price for a single unit of the base currency. (If <code>usd_quoted_at</code> is null, then the value came from the data source.)
+usd_quoted_at | If non null, the time of the market price quoted for <code>usd_unit_price</code>.
 exchange_transfer | If true, the transaction was a transfer between two exchanges.
 internal | If true, the transaction was a movement of assets within an exchange. For example, a transfer from a vault to a wallet.
 parent_id | The ID of the parent <code>Ledger</code> object. 
@@ -644,6 +646,7 @@ from_address | If available or applicable, the address of the source.
 trans_created | The date of the transaction.
 consolidations | If set, list of [transaction objects](#transaction-object) that make up this transaction.
 trade_pair | If set, for non-fiat, shows the break down of the [trade pair](#tradepair-object) that make up the core transaction.
+ds_id | If set, data source specific wallet id. This is not the wallet address, but additional id information that a data soruce may expose for a wallet.
 
 ## TradePair object
 
@@ -655,7 +658,8 @@ Name | Description
 currency | The base currency. 
 amount | Amount of the transaction.
 trans_type | The [transaction type](#transaction-type). 
-usd_unit_price | The USD price for a single unit of the currency. (A closing price on the date of the transaction will be used if none is available in the original transaction.)
+usd_unit_price | The USD price for a single unit of the base currency. (If <code>usd_quoted_at</code> is null, then the value came from the data source.)
+usd_quoted_at | If non null, the time of the market price quoted for <code>usd_unit_price</code>.
 ## Retrieve Exchange Ledgers
 
 > POST /ledgers
@@ -786,12 +790,12 @@ $ curl -X POST -H "Authorization: mytoken"  https://api.path.tech/v1/ledgers/eth
 	-d address='0xa...' 
 ```
 
-> GET /ledgers/ethereum (retrieve from cache)
+> GET /ledgers (retrieve from cache)
 
 > Example Request
 
 ```shell
-$ curl -G -H "Authorization: mytoken"  https://api.path.tech/v1/ledgers/ethereum?user_id=d5d...&name=myetherwallet&address=0xa..
+$ curl -G -H "Authorization: mytoken"  https://api.path.tech/v1/ledgers?user_id=d5d...&name=myetherwallet
 
 ```
 
