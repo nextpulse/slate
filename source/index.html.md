@@ -6,23 +6,23 @@ language_tabs: # must be one of https://git.io/vQNgJ
 
 
 toc_footers:
-  - <a href='https://path.tech?doc=1'>Sign Up for a Developer Key</a>
-  - last updated feb 13 2019
+  - <a href='https://path.one/api?doc=1'>Sign Up for a Developer Key</a>
+  - last updated may 16 2019
 
 search: true
----
+--- 
 
 # Introduction
 
 
 Path.'s Universal API platform offers a consistent view of data across the crypto ecosystem. The API provides methods for retrieving data from exchanges, wallets and various data sources. Data sources are extracted with read-only mode. No write updates are performed to ensure the integrity and security of all data sources.
 
-The base URL for all API requests is <code>https://api.path.tech/v1</code>
+The base URL for all API requests is <code>https://api.path.tech</code>
 
 
 <aside class="notice">We NEVER request exchange login credentials or passwords. We do not store any exchange's API secret keys.</aside>
 
-<aside class="warning">These APIs are at ALPHA stage. It is being used in early integrations and testing. It is expected there will be  changes before our production release. We welcome any feedback or suggestions hello@path.tech </aside>
+<aside class="warning">These APIs are at ALPHA stage. It is being used in early integrations and testing. It is expected there will be  changes before our production release. We welcome any feedback or suggestions hello@path.one </aside>
 
 <aside class="notice">This version of the API offers READ-only functionality.</aside>
 
@@ -36,7 +36,7 @@ The base URL for all API requests is <code>https://api.path.tech/v1</code>
 
 ```shell
 $ curl -H "Content-Type: application/json" -X POST \
-	-d '{"name":"myappname", "api_key":"00000000-0..."}' https://api.path.tech/v1/token
+	-d '{"name":"myappname", "api_key":"00000000-0..."}' https://api.path.tech/token
 ```
 
 
@@ -68,31 +68,50 @@ The token has an expiration time. Once expired, you will need to re-authenticate
 
 ## Pagination
 
-Path. utilizes cursor-based pagination via the `starting_after` and `ending_before` parameters. Both parameters take an existing object ID value and return objects in reverse chronological order (most recent first). The `ending_before` parameter returns objects listed before the named object. The `starting_after` parameter returns objects listed after the named object. If both parameters are provided, only `ending_before` is used.
+Certain bulk requests (fetching  `transactions` or `ledgers`) may return a large number of objects, so results are paginated.  
+
+Pagination is via the `offset` parameter.  Bulk request responses contain `total`  and `offset` fields. Manipulate the `offset` parameter to fetch all available objects. Objects are returned in reverse chronological order (most recent first).
 
 Pagination are available for API requests that support bulk fetches. It will be listed in the API's defintion.
 
+<aside class="notice">Once the <code>total</code> objects are known, it is advisable to use <code>GET</code> to fetch the remaining objects. This will fetch from the cache and avoid re-fetching from the data source.</aside>
 
 Name |  | Description
 --------- | ------- | -----------
 limit | optional | A limit on the number of objects to be returned, between 1 and 500. (Default 500.)
-starting_after | optional | A cursor for use in pagination. `starting_after` is an object ID that defines your place in the list. For instance, if you make a list request and receive 100 objects, ending with `obj_foo`, your subsequent call can include `starting_after=obj_foo` in order to fetch the next page of the list.
-ending_before| optional | A cursor for use in pagination. `ending_before` is an object ID that defines your place in the list. For instance, if you make a list request and receive 100 objects, starting with `obj_bar`, your subsequent call can include `ending_before=obj_bar` in order to fetch the previous page of the list.
+offset | optional | The number of objects to skip from the first (most recent) record. (Default 0.)
 
 
-## Async Callback Requests
+
+## Webhooks
 
 Many data sources (especially exchanges) have preset rate limits on how much or how often data may be retrieved. To minimize the impact of potentially hitting these limits, we intelligently allocate resources for data-intensive APIs and offer a call back parameter to inform the requesting client once the data is ready.
 
-The parameter <code>callback_url</code> containing the destination URL to post the response data may be provided as part of the API request.
+The parameter <code>callback_url</code> containing the destination URL to post the response data may be provided as part of the API request. The post back to the <code>callback_url</code> is 'as is' with no additional processing. So you may pass in additional application related parameters.
 
-Support for callbacks will be listed in the API's definition.
+For example <code>callback_url: https://myapp.com/dosomething?myparam=xyz</code>
+
+When processing the response, use [pagination](#pagination) to fetch any remaining objects.
+
+Support for webhook callbacks will be listed in the API's definition.
 
 ## Sandbox
 
 API requests in the sandbox may be slower than production endpoints. To help us debug and iterate, there are minimal caching and extensive debug logs in the sandbox environment.  Data may also be purged on a regular basis.  We maintain the same strong security measure for this environment. 
 
-The base URL for all sanbox API requests is <code>https://sandbox.path.tech/</code>
+The base URL for all sandbox API requests is <code>https://sandbox.path.tech/</code>
+
+## Transaction type
+
+There are currently no standard (or consistent use) of transaction types across the different exchanges. Path. will intelligently map these (based on context) to one of the following:
+
+Name | Description
+--------- | -----------
+bought | A transaction that is a buy trade.
+sold | A transaction that is a sell trade.
+received | The asset was received from a destination (source of ownership unknown). 
+send | The asset was transferred to another destination (source of ownership unknown).
+transfer | The asset was transferred to another destination owned by the same user.
 
 
 # Source
@@ -111,7 +130,7 @@ The base URL for all sanbox API requests is <code>https://sandbox.path.tech/</co
 > Example Request
 
 ```shell
-$ curl  -H "Authorization: mytoken"  https://api.path.tech/v1/sources
+$ curl  -H "Authorization: mytoken"  https://api.path.tech/sources
 ```
 > Example Response
 
@@ -124,7 +143,8 @@ $ curl  -H "Authorization: mytoken"  https://api.path.tech/v1/sources
 			"type": "exchange",
 			"key": true,
 			"oauth": false,
-			"csv": false
+			"csv": false,
+			"address": false
 		}
 		{...},
 		{...}
@@ -132,7 +152,10 @@ $ curl  -H "Authorization: mytoken"  https://api.path.tech/v1/sources
 }
 ```
 
-List all currently supported data sources where Path. may extract data information.
+List all currently supported data sources where Path. may extract data information. 
+
+No authentication required for this public API.
+
 
 ### Source Object
 
@@ -144,6 +167,7 @@ type | The type of data source.
 key | If true, data source's API key/secret is supported for retrieving data.
 oauth | If true, supports oauth token for authentication.
 csv | If true, support CSV file upload and processing of data
+address | If true, support fetching transactions with just the wallet address.
 
 
 
@@ -165,7 +189,7 @@ Data for a <code>User</code> are stored in our system for computational purposes
 > Example Request
 
 ```shell
-$ curl -X POST -H "Authorization: mytoken"  https://api.path.tech/v1/users
+$ curl -X POST -H "Authorization: mytoken"  https://api.path.tech/users
 ```
 > Example Response
 
@@ -187,7 +211,7 @@ Create a new <code>User</code> object.
 > Example Request
 
 ```shell
-$ curl -X DELETE -H "Authorization: mytoken"  https://api.path.tech/v1/users/cf64d...
+$ curl -X DELETE -H "Authorization: mytoken"  https://api.path.tech/users/cf64d...
 ```
 > Example Response
 
@@ -208,7 +232,7 @@ Permanently deletes a <code>User</code> object and all <code>Source</code> objec
 > Example Request
 
 ```shell
-$ curl -X DELETE -H "Authorization: mytoken"  https://api.path.tech/v1/sources \
+$ curl -X DELETE -H "Authorization: mytoken"  https://api.path.tech/sources \
 	-d user_id='d5d...' \
 	-d name='coinbase_pro' 
 ```
@@ -238,7 +262,7 @@ name | required | The name of the data source (obtained via [/sources](#list-sou
 > Example Request
 
 ```shell
-$ curl -H "Authorization: mytoken"  https://api.path.tech/v1/users
+$ curl -H "Authorization: mytoken"  https://api.path.tech/users
 ```
 
 
@@ -265,14 +289,29 @@ Return a list of all <code>User</code> objects currently associated with the app
 
 Retrieves the current balances for a <code>Source</code>.
 
-## Balances from an Exchange
+### Balance object
+
+Returned as part of the response from a <code>/balances</code> request.
+
+Name | Description
+--------- | -----------
+name | The label for the currency.
+currency | The currency code.
+balance | Amount in account/wallet.
+ds_id | A data source's internal proprietary id. NOTE: In most cases, this is NOT the wallet addreess.
+type | A data source's internal label. Known examples are 'vault' (Coinbase), 'trade', 'main' (Kucoin) 
+updated | The date when the balance was retrieved.
+usd_amount | The USD value of the balance.
+usd_updated | The time of the quoted USD market price.
+
+## Retrieve Balances
 
 > POST /balances
 
 > Example Request
 
 ```shell
-$ curl -X POST -H "Authorization: mytoken"  https://api.path.tech/v1/balances \
+$ curl -X POST -H "Authorization: mytoken"  https://api.path.tech/balances \
 	-d user_id='d5d...' \
 	-d name='coinbase_pro' \
 	--data-urlencode key='1a...' \
@@ -285,7 +324,7 @@ $ curl -X POST -H "Authorization: mytoken"  https://api.path.tech/v1/balances \
 > Example Request
 
 ```shell
-$ curl -G -H "Authorization: mytoken"  https://api.path.tech/v1/balances?user_id=d5d...&name=coinbase_pro
+$ curl -G -H "Authorization: mytoken"  https://api.path.tech/balances?user_id=d5d...&name=coinbase_pro
 
 ```
 
@@ -301,7 +340,7 @@ $ curl -G -H "Authorization: mytoken"  https://api.path.tech/v1/balances?user_id
 			"currency": "ltc",
 			"balance": "1.0",
 			"ds_id": "aaaaa...",
-			"vault": false,
+			"type": "vault",
 			"updated": "2018-10-03T16:59:34Z"
 		}
 		{...},
@@ -317,64 +356,19 @@ Name |  | Description
 --------- | ------- | -----------
 user_id | required | The ID of the <code>User</code> object.
 name | required | The name of the data source (obtained via [/sources](#list-sources)).
-key | optional | Must be provided if <code>oauth_token</code> is missing. 
+key | optional | The API key for the data source.
 secret | optional | If provided, it will be paired with the api_key.
 extra | optional | Additonal information for the data source. Dependent on the data source, examples may include an exchange's customer id.
 oauth_token | optional | For data sources that support oauth (for example, Coinbase), a valid oauth <code>access_token</code> can be passed. This takes precedence over <code>key</code>. Our API does not handle the handshake process.
+address | optional | The wallet address for a data source that do not require specific keys. For example, non exchange wallet sources like My Ether Wallet
 
-## Balances from Ethereum Wallet
+### Response 
 
-> POST /balances/ethereum
-
-> Example Request
-
-```shell
-$ curl -X POST -H "Authorization: mytoken"  https://api.path.tech/v1/balances/ethereum \
-	-d user_id='d5d...' \
-	-d name='myetherwallet' \
-	-d address='0xa3...' 
-
-```
-
-> GET /balances  (retrieve from cache)
-
-> Example Request
-
-```shell
-$ curl -G -H "Authorization: mytoken"  https://api.path.tech/v1/balances?user_id=d5d...&name=myetherwallet
-
-```
-
-> Example Response
-
-```json
-{
-	"user_id": "d5d...",
-	"name": "myetherwallet",
-	"data":[
-		{
-			"name": "LTC",
-			"currency": "ltc",
-			"balance": "1.0",
-			"ds_id": "aaaaa...",
-			"vault": false,
-			"updated": "2018-10-03T16:59:34Z"
-		}
-		{...},
-		{...}
-	]	
-}
-```
-
-
-### Request Parameters
-
-Name |  | Description
---------- | ------- | -----------
-user_id | required | The ID of the <code>User</code> object.
-name | required | The name of the data source (obtained via [/sources](#list-sources)).
-address | required | The wallet address.
-
+Name | Description
+--------- | -----------
+user_id | The ID of the <code>User</code> object.
+name | The name of the data source.
+data | Array of [balance objects](#balance-object)
 
 # Transaction
 
@@ -388,6 +382,7 @@ Name | Description
 --------- | -----------
 id | The ID of the <code>Transaction</code> object.
 trans_id | A data source's own specific id.
+network_hash | The network hash value if applicable.
 trans_type | The [transaction type](#transaction-type).  
 amount | Amount of the transaction.
 currency | The base currency. 
@@ -398,20 +393,9 @@ fee_currency | The currency of the fee.
 to_address | If available or applicable, the destination of the transaction.
 from_address | If available or applicable, the address of the source.
 trans_created | The date of the transaction.
+is_fork | If the transaction was part of a fork, this will be returned and set to true.
 
-### Transaction type
-
-There are currently no standard (or consistent use) of transaction types across the different exchanges. Path. will intelligently map these (based on context) to one of the following:
-
-Name | Description
---------- | -----------
-bought | A transaction that is a buy trade.
-sold | A transaction that is a sell trade.
-received | The asset was received from a destination (source of ownership unknown). 
-send | The asset was transferred to another destination (source of ownership unknown).
-transfer | The asset was transferred to another destination owned by the same user.
-
-## Retrieve Exchange Transactions
+## Retrieve Transactions
 
 
 > POST /transactions
@@ -419,7 +403,7 @@ transfer | The asset was transferred to another destination owned by the same us
 > Example Request
 
 ```shell
-$ curl -X POST -H "Authorization: mytoken"  https://api.path.tech/v1/transactions \
+$ curl -X POST -H "Authorization: mytoken"  https://api.path.tech/transactions \
 	-d user_id='d5d...' \
 	-d name='coinbase_pro' \
 	--data-urlencode key='1a...' \
@@ -433,7 +417,7 @@ $ curl -X POST -H "Authorization: mytoken"  https://api.path.tech/v1/transaction
 > Example Request
 
 ```shell
-$ curl -X POST -H "Authorization: mytoken"  https://api.path.tech/v1/transactions/csv \
+$ curl -X POST -H "Authorization: mytoken"  https://api.path.tech/transactions/csv \
     -d user_id='d5d...' \
     -d name='bittrex' \
     -d csvfile=bittrex.csv
@@ -444,7 +428,7 @@ $ curl -X POST -H "Authorization: mytoken"  https://api.path.tech/v1/transaction
 > Example Request
 
 ```shell
-$ curl -G -H "Authorization: mytoken"  https://api.path.tech/v1/transactions?user_id=d5d...&name=coinbase_pro
+$ curl -G -H "Authorization: mytoken"  https://api.path.tech/transactions?user_id=d5d...&name=coinbase_pro
 
 ```
 
@@ -455,6 +439,9 @@ $ curl -G -H "Authorization: mytoken"  https://api.path.tech/v1/transactions?use
 {
 	"user_id": "d5d...",
 	"name": "coinbase_pro",
+	"total": 620,
+	"returned": 500,
+  "offset": 0,
 	"data":[
 		{
 			"id": 12345
@@ -475,11 +462,17 @@ $ curl -G -H "Authorization: mytoken"  https://api.path.tech/v1/transactions?use
 	]	
 }
 ```
-Retrieves the transactions for an exchange <code>Source</code>. Depending on the exchange, there are two possible ways to retrieve transaction information. Using the data source's API keys/token or via information stored in the official CSV file.
+Retrieve the transactions from <code>Source</code>. 
+
+Depending on the data source, there are three possible ways to retrieve transaction information:
+
+* The data source's API keys/token.
+* The wallet address (for non exchange wallets).
+* Information stored in the official CSV file (typically downloaded from an exchange).
 
 This request supports [Pagination](#pagination)
 
-This request supports [Callbacks](#async-callback-requests)
+This request supports [Callbacks](#webhooks)
 
 ### Request Parameters
 
@@ -487,10 +480,11 @@ Name |  | Description
 --------- | ------- | -----------
 user_id | required | The ID of the <code>User</code> object.
 name | required | The name of the data source (obtained via [/sources](#list-sources)).
-key | optional | Must be provided if <code>oauth_token</code> is missing. 
+key | optional | The API key for the data source. 
 secret | optional | If provided, it will be paired with the api_key.
 extra | optional | Additonal information for the data source. Dependent on the data source, examples may include an exchange's customer id.
 oauth_token | optional | For data sources that support oauth (for example, Coinbase), a valid oauth <code>access_token</code> can be passed. This takes precedence over <code>key</code>. Our API does not handle the handshake process.
+address | optional | The wallet address for a data source that do not require specific keys. For example, non exchange wallet sources like My Ether Wallet
 
 ### Request Parameters (for CSV)
 
@@ -506,68 +500,10 @@ Name | Description
 --------- | -----------
 user_id | The ID of the <code>User</code> object.
 name | The name of the data source.
+total | The total number of <code>Transaction</code> objects available.
+returned | The number of <code>Transaction</code> objects returned in this request.
+offset | The number of objects from the first (most recent) record.
 data | Array of [transaction objects](#transaction-object)
-
-## Retrieve Ethereum Wallet Transactions
-
-> POST /transactions/ethereum
-
-> Example Request
-
-```shell
-$ curl -X POST -H "Authorization: mytoken"  https://api.path.tech/v1/transactions/ethereum \
-	-d user_id='d5d...' \
-	-d name='myetherwallet' \
-	-d address='0xa...' 
-```
-
-> GET /transactions (retrieve from cache)
-
-> Example Request
-
-```shell
-$ curl -G -H "Authorization: mytoken"  https://api.path.tech/v1/transactions?user_id=d5d...&name=myetherwallet
-
-```
-
-> Example Response
-
-```json
-{
-	"user_id": "d5d...",
-	"name": "myetherwallet",
-	"data":[
-		{
-			"id": 12345
-			"trans_id": "LNJBB3-....."
-			"trans_type": "sold"
-			"amount": 1.0
-			"currrency": "ltc",
-			"native_amount": 0.004,
-			"native_currency": "btc",
-			"fee_amount": 0,
-			"fee_currency": "btc",
-			"to_address": null,
-			"from_address": null,
-			"trans_created": "2017-10-03T16:59:34Z"
-		}
-		{...},
-		{...}
-	]	
-}
-```
-Retrieves the transactions for an ethereum <code>Source</code>. This request will also return Erc20 transactions.
-
-This request supports [Pagination](#pagination)
-
-
-### Request Parameters
-
-Name |  | Description
---------- | ------- | -----------
-user_id | required | The ID of the <code>User</code> object.
-name | required | The name of the data source (obtained via [/sources](#list-sources)).
-address | required | The wallet address.
 
 ## Retrieve a single Transaction
 
@@ -576,7 +512,7 @@ address | required | The wallet address.
 > Example Request
 
 ```shell
-$ curl -G -H "Authorization: mytoken"  https://api.path.tech/v1/transactions/145  
+$ curl -G -H "Authorization: mytoken"  https://api.path.tech/transactions/145  
 
 ```
 
@@ -623,7 +559,8 @@ Returned as part of the response from a <code>/ledgers</code> request.
 
 Name | Description
 --------- | -----------
-id | The ID of the <code>Ledger</code> object.
+id | The ID of the <code>Ledger</code> object. As new transactions or data sources are added/deleted, the Path. system will recalculate the mapping relationships. <code>Pledger</code> objects (and hence the ids) are created/deleted accordingly.
+transaction_id | The ID of the <code>Transaction</code> object.
 network_hash | The network hash value if applicable.
 trans_id | Data source's own specific id.
 trans_type | The [transaction type](#transaction-type).  
@@ -647,6 +584,7 @@ trans_created | The date of the transaction.
 consolidations | If set, list of [transaction objects](#transaction-object) that make up this transaction.
 trade_pair | If set, for non-fiat, shows the break down of the [trade pair](#tradepair-object) that make up the core transaction.
 ds_id | If set, data source specific wallet id. This is not the wallet address, but additional id information that a data soruce may expose for a wallet.
+is_fork | If the transaction was part of a fork, this will be returned and set to true.
 
 ## TradePair object
 
@@ -660,14 +598,14 @@ amount | Amount of the transaction.
 trans_type | The [transaction type](#transaction-type). 
 usd_unit_price | The USD price for a single unit of the base currency. (If <code>usd_quoted_at</code> is null, then the value came from the data source.)
 usd_quoted_at | If non null, the time of the market price quoted for <code>usd_unit_price</code>.
-## Retrieve Exchange Ledgers
+## Retrieve Ledgers
 
 > POST /ledgers
 
 > Example Request
 
 ```shell
-$ curl -X POST -H "Authorization: mytoken"  https://api.path.tech/v1/ledgers \
+$ curl -X POST -H "Authorization: mytoken"  https://api.path.tech/ledgers \
 	-d user_id='d5d...' \
 	-d name='kraken' \
 	--data-urlencode key='1a...' \
@@ -680,7 +618,7 @@ $ curl -X POST -H "Authorization: mytoken"  https://api.path.tech/v1/ledgers \
 > Example Request
 
 ```shell
-$ curl -X POST -H "Authorization: mytoken"  https://api.path.tech/v1/ledgers/csv \
+$ curl -X POST -H "Authorization: mytoken"  https://api.path.tech/ledgers/csv \
     -d user_id='d5d...' \
     -d name='bittrex' \
     -d csvfile=bittrex.csv
@@ -691,7 +629,7 @@ $ curl -X POST -H "Authorization: mytoken"  https://api.path.tech/v1/ledgers/csv
 > Example Request
 
 ```shell
-$ curl -G -H "Authorization: mytoken"  https://api.path.tech/v1/ledgers?user_id=d5d...&name=kraken
+$ curl -G -H "Authorization: mytoken"  https://api.path.tech/ledgers?user_id=d5d...&name=kraken
 
 ```
 
@@ -701,6 +639,9 @@ $ curl -G -H "Authorization: mytoken"  https://api.path.tech/v1/ledgers?user_id=
 {
 	"user_id": "d5d...",
 	"name": "kraken",
+	"total": 240,
+	"returned": 240,
+	"offset": 0,
 	"data":[
 		{
 			"id": 12345
@@ -742,12 +683,18 @@ $ curl -G -H "Authorization: mytoken"  https://api.path.tech/v1/ledgers?user_id=
 	]	
 }
 ```
+Retrieves <code>Ledger</code> objects for a <code>User</code>. 
 
-Retrieves <code>Ledger</code> objects for a <code>User</code> for an exchange. Depending on the exchange, there are two possible ways to retrieve transaction information. Using the data source's API keys/token or via information stored in the official CSV file.
+Depending on the data source, there are three possible ways to retrieve transaction information:
+
+* The data source's API keys/token.
+* The wallet address (for non exchange wallets).
+* Information stored in the official CSV file (typically downloaded from an exchange).
+
 
 This request supports [Pagination](#pagination)
 
-This request supports [Callbacks](#async-callback-requests)
+This request supports [Callbacks](#webhooks)
 
 ### Request Parameters
 
@@ -755,10 +702,11 @@ Name |  | Description
 --------- | ------- | -----------
 user_id | required | The ID of the <code>User</code> object.
 name | required | The name of the data source (obtained via [/sources](#list-sources)).
-key | optional | Must be provided if <code>oauth_token</code> is missing.
+key | optional | The API key for the data source.
 secret | optional | If provided, it will be paired with the api_key.
 extra | optional | Additonal information for the data source. Dependent on the data source, examples may include an exchange's customer id.
 oauth_token | optional | For data sources that support oauth (for example, Coinbase), a valid oauth <code>access_token</code> can be passed. This takes precedence over <code>key</code>. Our API does not handle the handshake process.
+address | optional | The wallet address for a data source that do not require specific keys. For example, non exchange wallet sources like My Ether Wallet
 
 ### Request Parameters (for CSV)
 
@@ -774,69 +722,10 @@ Name | Description
 --------- | -----------
 user_id | The ID of the <code>User</code> object.
 name | The name of the data source.
+total | The total number of <code>Ledger</code> objects available.
+returned | The number of <code>Ledger</code> objects returned in this request.
+offset | The number of objects from the first (most recent) record.
 data | Array of [ledger objects](#ledger-object)
-
-
-## Retrieve Ethereum Wallet Ledgers
-
-> POST /ledgers/ethereum
-
-> Example Request
-
-```shell
-$ curl -X POST -H "Authorization: mytoken"  https://api.path.tech/v1/ledgers/ethereum \
-	-d user_id='d5d...' \
-	-d name='myetherwallet' \
-	-d address='0xa...' 
-```
-
-> GET /ledgers (retrieve from cache)
-
-> Example Request
-
-```shell
-$ curl -G -H "Authorization: mytoken"  https://api.path.tech/v1/ledgers?user_id=d5d...&name=myetherwallet
-
-```
-
-> Example Response
-
-```json
-{
-	"user_id": "d5d...",
-	"name": "myetherwallet",
-	"data":[
-		{
-			"id": 12345
-			"trans_id": "LNJBB3-....."
-			"trans_type": "sold"
-			"amount": 1.0
-			"currrency": "ltc",
-			"native_amount": 0.004,
-			"native_currency": "btc",
-			"fee_amount": 0,
-			"fee_currency": "btc",
-			"to_address": null,
-			"from_address": null,
-			"trans_created": "2017-10-03T16:59:34Z"
-		}
-		{...},
-		{...}
-	]	
-}
-```
-Retrieves the transactions for an ethereum <code>Source</code>. This request will also return Erc20 transactions.
-
-This request supports [Pagination](#pagination)
-
-
-### Request Parameters
-
-Name |  | Description
---------- | ------- | -----------
-user_id | required | The ID of the <code>User</code> object.
-name | required | The name of the data source (obtained via [/sources](#list-sources)).
-address | required | The wallet address.
 
 ## Retrieve a single Ledger
 
@@ -845,7 +734,7 @@ address | required | The wallet address.
 > Example Request
 
 ```shell
-$ curl -G -H "Authorization: mytoken"  https://api.path.tech/v1/ledgers/12345 
+$ curl -G -H "Authorization: mytoken"  https://api.path.tech/ledgers/12345 
 
 ```
 
@@ -931,7 +820,7 @@ Ruby Gem (coming soon)
 
 PHP (coming soon)
 
-Want to help? hello@path.tech
+Want to help? hello@path.one
 
 
 
@@ -948,14 +837,16 @@ Where possible, our system will only fetch new data that was not previously reco
 
 # Known Issues
 
-Please check our [blog post](https://blog.path.tech/known-issues-and-challenges-with-exchanges-api/) for current known issues.
+CSV and Bitfinex support are currently experimental.
+
+Please check our [blog post](https://blog.path.one/known-issues-and-challenges-with-exchanges-api/) for other current known issues.
 
 # Roadmap
 
 - Additional data sources
 
 
-[Path.Tax](https://path.tax)  is our reference application built on top of the Path. API platform. The architecture decouples the business logic from the data layer. So information like gain and loss are not offered as part of the base API platform. If you are interested in learning more please contact us directly at hello@path.tech
+[Path. Tax](https://path.one/tax)  is our reference application built on top of the Path. API platform. The architecture decouples the business logic from the data layer. Information like gain and loss are not offered as part of the base API platform. If you are interested in learning more please contact us directly at hello@path.one
 
 
 
