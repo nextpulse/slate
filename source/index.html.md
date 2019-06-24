@@ -7,7 +7,7 @@ language_tabs: # must be one of https://git.io/vQNgJ
 
 toc_footers:
   - <a href='https://path.one/api?doc=1'>Sign Up for a Developer Key</a>
-  - last updated may 16 2019
+  - last updated june 24 2019
 
 search: true
 --- 
@@ -388,10 +388,14 @@ amount | Amount of the transaction.
 currency | The base currency. 
 native_amount | The quote amount. 
 native_currency | The quote currency. (For example the currency used to obtain the base currency in the transaction.)
+quoted_unit_price | If available, the market price per unit quoted by the data source.
+quoted_currency | The currency of the quoted unit price.
 fee_amount | If available or applicable, fee associated with the transaction. 
 fee_currency | The currency of the fee.
 to_address | If available or applicable, the destination of the transaction.
+to_address_source | If known, the name of the source for <code>to_address</code> (for example, 'Binance').
 from_address | If available or applicable, the address of the source.
+from_address_source | If known, the name of the source for <code>from_address</code>. 
 trans_created | The date of the transaction.
 is_fork | If the transaction was part of a fork, this will be returned and set to true.
 
@@ -451,10 +455,14 @@ $ curl -G -H "Authorization: mytoken"  https://api.path.tech/transactions?user_i
 			"currrency": "ltc",
 			"native_amount": 0.004,
 			"native_currency": "btc",
+      "quoted_unit_price": "6002.12",
+      "quoted_currency": "usd",
 			"fee_amount": 0,
 			"fee_currency": "btc",
 			"to_address": null,
+      "to_address_source": null,
 			"from_address": null,
+      "from_address_source": null,
 			"trans_created": "2017-10-03T16:59:34Z"
 		}
 		{...},
@@ -531,10 +539,14 @@ $ curl -G -H "Authorization: mytoken"  https://api.path.tech/transactions/145
 			"currrency": "eth",
 			"native_amount": 210.00,
 			"native_currency": "usd",
+      "quoted_unit_price": "210.00",
+      "quoted_currency": "usd",
 			"fee_amount": null,
 			"fee_currency": null,
 			"to_address": null,
+      "to_address_source": null,
 			"from_address": null,
+      "from_address_source": null,
 			"trans_created": "2018-10-04T17:59:34Z"
 		}
 	]	
@@ -571,15 +583,17 @@ native_amount | The quote amount.
 native_currency | The quote currency. (For example the currency used to obtain the base currency in the transaction.)
 fee_amount | If available or applicable, fee associated with the transaction. 
 fee_currency | The currency of the fee.
-description | Additional information to describe the transaction.
+description | Deprecated.
 usd_unit_price | The USD price for a single unit of the base currency. (If <code>usd_quoted_at</code> is null, then the value came from the data source.)
 usd_quoted_at | If non null, the time of the market price quoted for <code>usd_unit_price</code>.
 exchange_transfer | If true, the transaction was a transfer between two exchanges.
 internal | If true, the transaction was a movement of assets within an exchange. For example, a transfer from a vault to a wallet.
-parent_id | The ID of the parent <code>Ledger</code> object. 
+parent_id | The ID of the parent <code>Ledger</code> object.
 child_id | The ID of the child <code>Ledger</code> object.
 to_address | If available or applicable, the destination of the transaction.
+to_address_source | If known, the name of the source for <code>to_address</code> (for example, 'Binance').
 from_address | If available or applicable, the address of the source.
+from_address_source | If known, the name of the source for <code>from_address</code>. 
 trans_created | The date of the transaction.
 consolidations | If set, list of [transaction objects](#transaction-object) that make up this transaction.
 trade_pair | If set, for non-fiat, shows the break down of the [trade pair](#tradepair-object) that make up the core transaction.
@@ -655,9 +669,10 @@ $ curl -G -H "Authorization: mytoken"  https://api.path.tech/ledgers?user_id=d5d
 			"fee_amount": 0.0001,
 			"fee_currency": "btc",
 			"to_address": null,
+      "to_address_source": null,
 			"from_address": null,
-			"trans_created": "2015-01-15T01:12:00Z"
-			"description": "sold BTC and received XLM",
+      "from_address_source": null,
+			"trans_created": "2015-01-15T01:12:00Z",
 			"usd_unit_price": null,
 			"exchange_transfer": false,
 			"parent_id": null, 
@@ -757,9 +772,10 @@ $ curl -G -H "Authorization: mytoken"  https://api.path.tech/ledgers/12345
 			"fee_amount": 0.0001,
 			"fee_currency": "btc",
 			"to_address": null,
+      "to_address_source": null,
 			"from_address": null,
+      "from_address_source": null,
 			"trans_created": "2015-01-15T01:12:00Z"
-			"description": "sold BTC and received XLM",
 			"usd_unit_price": null,
 			"exchange_transfer": false,
 			"parent_id": null, 
