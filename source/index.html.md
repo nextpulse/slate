@@ -6,8 +6,7 @@ language_tabs: # must be one of https://git.io/vQNgJ
 
 
 toc_footers:
-  - <a href='https://path.one/api?doc=1'>Sign Up for a Developer Key</a>
-  - last updated june 24 2019
+  - last updated jul 15 2019
 
 search: true
 --- 
@@ -22,10 +21,16 @@ The base URL for all API requests is <code>https://api.path.tech</code>
 
 <aside class="notice">We NEVER request exchange login credentials or passwords. We do not store any exchange's API secret keys.</aside>
 
-<aside class="warning">These APIs are at ALPHA stage. It is being used in early integrations and testing. It is expected there will be  changes before our production release. We welcome any feedback or suggestions hello@path.one </aside>
-
 <aside class="notice">This version of the API offers READ-only functionality.</aside>
 
+
+For faster onboarding and testing of the API, you can access the sandbox via our partners.
+
+<a href="https://rapidapi.com/path/api/path-cryptocurrency" target="_blank">
+	<img src="https://storage.googleapis.com/code-snippets/connect-on-rapidapi-light.png" width="215" alt="Connect on RapidAPI">
+</a>
+
+For advance usage or production access, contact us on hello@path.one
 
 ## Authentication
 
@@ -123,7 +128,7 @@ transfer | The asset was transferred to another destination owned by the same us
 <aside class="notice">A general rule of thumb: 
 	POST requests are typically a fetch from the remote data source. GET requests return cache data from prior fetches. </aside>
 
-## List Sources
+## List Supported Sources
 
 > GET /sources
 
@@ -178,7 +183,7 @@ Path. does not store any data source login credentials or exchange's API keys. S
 For example, you may want to fetch data for the same user from Coinbase and Binance.  For your app, you will associate your app's user with the same <code>User</code> object id. 
 
 
-Data for a <code>User</code> are stored in our system for computational purposes. You may delete it at any time. One advantage of it being in our system is that we can minimize requests to external sources (for example, throttles on exchanges). It will also provide a faster response to requests, as there is minimal recalculation. 
+Data for a <code>User</code> are stored in our system for computational purposes. You may delete it at any time. One advantage of it being in our system is that we can minimize requests to external sources (for example, throttles on exchanges). It will also provide faster responses to requests, as there is minimal recalculation. 
 
 
 	
@@ -357,10 +362,10 @@ Name |  | Description
 user_id | required | The ID of the <code>User</code> object.
 name | required | The name of the data source (obtained via [/sources](#list-sources)).
 key | optional | The API key for the data source.
-secret | optional | If provided, it will be paired with the api_key.
+secret | optional | If provided, it will be paired with the key.
 extra | optional | Additonal information for the data source. Dependent on the data source, examples may include an exchange's customer id.
 oauth_token | optional | For data sources that support oauth (for example, Coinbase), a valid oauth <code>access_token</code> can be passed. This takes precedence over <code>key</code>. Our API does not handle the handshake process.
-address | optional | The wallet address for a data source that do not require specific keys. For example, non exchange wallet sources like My Ether Wallet
+address | optional | The wallet address for a data source that do not require specific keys. For example, non exchange wallet sources like My Ether Wallet.
 
 ### Response 
 
@@ -445,7 +450,7 @@ $ curl -G -H "Authorization: mytoken"  https://api.path.tech/transactions?user_i
 	"name": "coinbase_pro",
 	"total": 620,
 	"returned": 500,
-  "offset": 0,
+	"offset": 0,
 	"data":[
 		{
 			"id": 12345
@@ -455,14 +460,14 @@ $ curl -G -H "Authorization: mytoken"  https://api.path.tech/transactions?user_i
 			"currrency": "ltc",
 			"native_amount": 0.004,
 			"native_currency": "btc",
-      "quoted_unit_price": "6002.12",
-      "quoted_currency": "usd",
+			"quoted_unit_price": "6002.12",
+			"quoted_currency": "usd",
 			"fee_amount": 0,
 			"fee_currency": "btc",
 			"to_address": null,
-      "to_address_source": null,
+			"to_address_source": null,
 			"from_address": null,
-      "from_address_source": null,
+			"from_address_source": null,
 			"trans_created": "2017-10-03T16:59:34Z"
 		}
 		{...},
@@ -489,10 +494,10 @@ Name |  | Description
 user_id | required | The ID of the <code>User</code> object.
 name | required | The name of the data source (obtained via [/sources](#list-sources)).
 key | optional | The API key for the data source. 
-secret | optional | If provided, it will be paired with the api_key.
+secret | optional | If provided, it will be paired with the key.
 extra | optional | Additonal information for the data source. Dependent on the data source, examples may include an exchange's customer id.
 oauth_token | optional | For data sources that support oauth (for example, Coinbase), a valid oauth <code>access_token</code> can be passed. This takes precedence over <code>key</code>. Our API does not handle the handshake process.
-address | optional | The wallet address for a data source that do not require specific keys. For example, non exchange wallet sources like My Ether Wallet
+address | optional | The wallet address for a data source that do not require specific keys. For example, non exchange wallet sources like My Ether Wallet.
 
 ### Request Parameters (for CSV)
 
@@ -539,14 +544,14 @@ $ curl -G -H "Authorization: mytoken"  https://api.path.tech/transactions/145
 			"currrency": "eth",
 			"native_amount": 210.00,
 			"native_currency": "usd",
-      "quoted_unit_price": "210.00",
-      "quoted_currency": "usd",
+			"quoted_unit_price": "210.00",
+			"quoted_currency": "usd",
 			"fee_amount": null,
 			"fee_currency": null,
 			"to_address": null,
-      "to_address_source": null,
+			"to_address_source": null,
 			"from_address": null,
-      "from_address_source": null,
+			"from_address_source": null,
 			"trans_created": "2018-10-04T17:59:34Z"
 		}
 	]	
@@ -669,9 +674,9 @@ $ curl -G -H "Authorization: mytoken"  https://api.path.tech/ledgers?user_id=d5d
 			"fee_amount": 0.0001,
 			"fee_currency": "btc",
 			"to_address": null,
-      "to_address_source": null,
+			"to_address_source": null,
 			"from_address": null,
-      "from_address_source": null,
+			"from_address_source": null,
 			"trans_created": "2015-01-15T01:12:00Z",
 			"usd_unit_price": null,
 			"exchange_transfer": false,
@@ -718,10 +723,10 @@ Name |  | Description
 user_id | required | The ID of the <code>User</code> object.
 name | required | The name of the data source (obtained via [/sources](#list-sources)).
 key | optional | The API key for the data source.
-secret | optional | If provided, it will be paired with the api_key.
+secret | optional | If provided, it will be paired with the key.
 extra | optional | Additonal information for the data source. Dependent on the data source, examples may include an exchange's customer id.
 oauth_token | optional | For data sources that support oauth (for example, Coinbase), a valid oauth <code>access_token</code> can be passed. This takes precedence over <code>key</code>. Our API does not handle the handshake process.
-address | optional | The wallet address for a data source that do not require specific keys. For example, non exchange wallet sources like My Ether Wallet
+address | optional | The wallet address for a data source that do not require specific keys. For example, non exchange wallet sources like My Ether Wallet.
 
 ### Request Parameters (for CSV)
 
@@ -772,9 +777,9 @@ $ curl -G -H "Authorization: mytoken"  https://api.path.tech/ledgers/12345
 			"fee_amount": 0.0001,
 			"fee_currency": "btc",
 			"to_address": null,
-      "to_address_source": null,
+			"to_address_source": null,
 			"from_address": null,
-      "from_address_source": null,
+			"from_address_source": null,
 			"trans_created": "2015-01-15T01:12:00Z"
 			"usd_unit_price": null,
 			"exchange_transfer": false,
@@ -832,11 +837,11 @@ Code| Meaning
 
 # Libraries
 
-Ruby Gem (coming soon)
+For faster onboarding and testing of the API, you can access the sandbox via our partners which offer support for most major languages.
 
-PHP (coming soon)
-
-Want to help? hello@path.one
+<a href="https://rapidapi.com/path/api/path-cryptocurrency" target="_blank">
+	<img src="https://storage.googleapis.com/code-snippets/connect-on-rapidapi-light.png" width="215" alt="Connect on RapidAPI">
+</a>
 
 
 
